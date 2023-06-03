@@ -7,4 +7,3 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.3.1", features = ["cargo"] }
-git2 = "0.17.2"

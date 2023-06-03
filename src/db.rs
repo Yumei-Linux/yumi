@@ -1,6 +1,6 @@
 use std::{path::{PathBuf, Path}};
 
-use git2::Repository;
+use crate::repository::Repository;
 
 pub struct DB {
     pub path: PathBuf
@@ -33,12 +33,8 @@ impl DB {
         println!("[I] Updating yumi-packages into {}", path.to_string_lossy().to_string());
     
         let url = "https://github.com/Yumei-Linux/yumi-packages.git";
-        if let Err(err) = Repository::clone(url, path) {
-            return Err(err.to_string());
-        }
 
-        println!("[S] Done!");
-
-        Ok(())
+        Repository::new(url.to_string())
+            .clone_at(path)
     }
 }

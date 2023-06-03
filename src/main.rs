@@ -1,7 +1,12 @@
 pub mod db;
+pub mod repository;
 
 pub mod core {
     pub mod sync;
+}
+
+pub mod util {
+    pub mod exec;
 }
 
 use crate::core::sync::SyncCommand;
