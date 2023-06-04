@@ -1,10 +1,10 @@
 use crate::db::DB;
 
-pub struct SyncCommand {
+pub struct Sync {
     db: DB
 }
 
-impl SyncCommand {
+impl Sync {
     pub fn new() -> Self {
         Self {
             db: DB::new()
