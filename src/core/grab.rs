@@ -88,7 +88,7 @@ impl Grab {
             std::process::exit(1);
         }
 
-        println!("  * Building finished for package {}", pkg);
+        println!("* Building finished for package {}", pkg);
     }
 
     async fn install_pkg(&self, pkg: &str) -> Result<(), String> {
