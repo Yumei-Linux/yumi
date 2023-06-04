@@ -1,7 +1,5 @@
 use std::path::{PathBuf, Path};
-
-use crate::util::{metadata::{Metadata, Data}, confirm::confirm, exec};
-
+use crate::util::{metadata::{Metadata, Data}, confirm::confirm, exec, fetch::fetch_url};
 use super::query::Query;
 
 pub struct Grab {
@@ -47,16 +45,20 @@ impl Grab {
         PkgPaths::from_root(root)
     }
 
-    fn download_sources(&self, metadata: &Data) {
+    async fn download_sources(&self, metadata: &Data) {
         for (name, url) in metadata.downloads.clone().into_iter() {
             println!("Downloading source: {}...", name);
 
-            // creating the temp folder here because -pv validates if the folder
-            // is already there and if so it will automatically skip creating
-            // it without showing some error or things.
+            let url = url.to_string().replace("\"", "");
+
+            if let Err(err) = fetch_url(url, name.to_string()).await {
+                println!("Cannot download {}: {}", name, err.to_string());
+                std::process::exit(1);
+            }
+
             let command = format!(
-                "mkdir -pv ./.yumi-downloads && wget {} && mv -v {} ./.yumi-downloads",
-                url, name
+                "mkdir -pv ./.yumi-downloads && mv -v {} ./.yumi-downloads",
+                name
             );
 
             exec::exec(command).unwrap_or_else(|error| {
@@ -89,7 +91,7 @@ impl Grab {
         println!("  * Building finished for package {}", pkg);
     }
 
-    fn install_pkg(&self, pkg: &str) -> Result<(), String> {
+    async fn install_pkg(&self, pkg: &str) -> Result<(), String> {
         let pkg_paths = self.pkg_paths(pkg);
         if !pkg_paths.root.is_dir() {
             return Err(format!("Yumi wasn't able to find {}, sorry for the inconvenients.", pkg));
@@ -108,16 +110,16 @@ impl Grab {
         Query::show_pkg_info(&parsed_metadata);
 
         if confirm(format!("Do you wish to merge this package? ({})", parsed_metadata.metadata.name).as_str()) {
-            self.download_sources(&parsed_metadata);
+            self.download_sources(&parsed_metadata).await;
             self.run_builder(pkg, &pkg_paths);
         }
 
         Ok(())
     }
 
-    pub fn install_pkgs(&self) -> Result<(), String> {
+    pub async fn install_pkgs(&self) -> Result<(), String> {
         for pkg in &self.pkgs {
-            if let Err(err) = self.install_pkg(pkg) {
+            if let Err(err) = self.install_pkg(pkg).await {
                 return Err(err);
             }
         }
