@@ -5,7 +5,6 @@ pub mod util {
     pub mod exec;
     pub mod metadata;
     pub mod confirm;
-    pub mod fetch;
 }
 
 pub mod core {
@@ -20,8 +19,7 @@ use crate::core::sync::Sync;
 use crate::core::grab::Grab;
 use clap::{command, Command, Arg, ArgAction};
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let matches = command!()
         .subcommand(
             Command::new("sync")
@@ -45,7 +43,7 @@ async fn main() {
             .map(|v| v.to_string())
             .collect::<Vec<_>>();
 
-        Grab::new(pkgs).install_pkgs().await.unwrap_or_else(|error| {
+        Grab::new(pkgs).install_pkgs().unwrap_or_else(|error| {
             println!("Cannot grab pkgs: {}", error.to_string());
             exit(1);
         });

@@ -9,5 +9,3 @@ edition = "2021"
 clap = { version = "4.3.1", features = ["cargo"] }
 serde = { version = "1.0.163", features = ["derive"] }
 toml = "0.7.4"
-reqwest = "*"
-tokio = { version = "1", features = ["full"] }
